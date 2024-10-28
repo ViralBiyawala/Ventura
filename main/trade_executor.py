@@ -1,6 +1,6 @@
 from gym_anytrading.envs import Actions
 from logging_config import logger  # Import the logger from logging_config
-from data_fetcher import fetch_real_time_data
+from data_fetcher import fetch_real_time_data  # Import the fetch_real_time_data function from data_fetcher
 import time
 
 # trade_executor.py
@@ -16,13 +16,12 @@ def execute_trades(env, model, initial_balance, trade_fraction, symbol):
         action, _states = model.predict(observation)
         
         # Fetch real-time price
-        # real_time_data = fetch_real_time_data(symbol)
-        # if real_time_data:
-        #     current_price = real_time_data['latestPrice']
-        # else:
-        #     current_price = env.unwrapped.prices[env.unwrapped._current_tick]
-
-        current_price = env.unwrapped.prices[env.unwrapped._current_tick]
+        real_time_data = fetch_real_time_data(symbol)
+        if real_time_data:
+            current_price = float(real_time_data['close'])
+            print(f"Current price: {current_price}")
+        else:
+            current_price = env.unwrapped.prices[env.unwrapped._current_tick]
 
         observation, reward, terminated, truncated, info = env.step(action)
 
@@ -48,7 +47,7 @@ def execute_trades(env, model, initial_balance, trade_fraction, symbol):
             break
 
         # Sleep to simulate real-time trading
-        # time.sleep(1)
+        time.sleep(2)
 
     if shares_held > 0:
         balance += shares_held * current_price

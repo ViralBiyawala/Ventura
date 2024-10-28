@@ -6,7 +6,7 @@ from model_trainer import train_model
 
 
 # main.py
-def main(data_file="../AAPL.csv", total_timesteps=1000, initial_balance=1000, trade_fraction=0.50, symbol="AAPL"):
+def main(data_file="../AAPL.csv", total_timesteps=1000, initial_balance=1000, trade_fraction=0.50, symbol="TATAMOTORS"):
     data = load_data(data_file)
     if data is None:
         return
