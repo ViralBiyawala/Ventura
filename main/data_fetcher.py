@@ -4,19 +4,21 @@ from dotenv import load_dotenv
 from logging_config import logger
 
 def fetch_real_time_data(symbol):
+    return None
     load_dotenv()
 
     API_KEY = os.getenv('ALPHA_VANTAGE_API_KEY')
+    # url = f'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={symbol}&outputsize=full&apikey={API_KEY}'
     url = f'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol={symbol}&interval=1min&apikey={API_KEY}'
 
     try:
         r = requests.get(url)
         data = r.json()
 
-        if 'Time Series (1min)' in data:
+        if 'Time Series (Daily)' in data:
             # Get the latest bar
-            latest_timestamp = max(data['Time Series (1min)'])
-            latest_bar = data['Time Series (1min)'][latest_timestamp]
+            latest_timestamp = max(data['Time Series (Daily)'])
+            latest_bar = data['Time Series (Daily)'][latest_timestamp]
             bar_dict = {
                 'open': latest_bar['1. open'],
                 'high': latest_bar['2. high'],
@@ -25,7 +27,8 @@ def fetch_real_time_data(symbol):
                 'volume': latest_bar['5. volume'],
                 'timestamp': latest_timestamp
             }
-            logger.info(f"Successfully fetched data for {symbol}")
+            logger.info(f"Data fetched for {symbol}: {bar_dict}")
+            # logger.info(f"Successfully fetched data for {symbol}")
             return bar_dict
         else:
             logger.error(f"No data found for symbol: {symbol}")
