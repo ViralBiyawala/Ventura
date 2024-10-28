@@ -1,5 +1,18 @@
 import logging
+import logging.handlers
+import os
 
-# logging_config.py
-# Configure logging to write to a file
-logging.basicConfig(filename='simulation.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+# Create a logs directory if it doesn't exist
+log_directory = 'logs'
+if not os.path.exists(log_directory):
+    os.makedirs(log_directory)
+
+# Configure logging
+log_file = os.path.join(log_directory, 'simulation.log')
+handler = logging.handlers.RotatingFileHandler(log_file, maxBytes=10**6, backupCount=5)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+logger.addHandler(handler)

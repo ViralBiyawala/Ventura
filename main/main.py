@@ -1,7 +1,7 @@
 from trade_executor import execute_trades
 from data_loader import load_data
 from environment_creator import create_environment
-from logging_config import logging
+from logging_config import logger
 from model_trainer import train_model
 
 
@@ -16,7 +16,7 @@ def main(data_file="../AAPL.csv", total_timesteps=1000, initial_balance=1000, tr
     if env is None:
         return
 
-    logging.info("Observation Space: %s", env.observation_space)
+    logger.info("Observation Space: %s", env.observation_space)
 
     model = train_model(env, total_timesteps)
     execute_trades(env, model, initial_balance, trade_fraction, symbol)

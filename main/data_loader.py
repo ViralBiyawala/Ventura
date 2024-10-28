@@ -1,5 +1,5 @@
 import pandas as pd
-from logging_config import logging
+from logging_config import logger
 
 # data_loader.py
 def load_data(data_file):
@@ -7,5 +7,5 @@ def load_data(data_file):
         data = pd.read_csv(data_file, parse_dates=True, index_col='Date')
         return data
     except FileNotFoundError:
-        logging.error(f"File {data_file} not found.")
+        logger.error(f"File {data_file} not found.")
         return None

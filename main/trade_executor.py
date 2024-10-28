@@ -1,6 +1,5 @@
-import gym_anytrading
 from gym_anytrading.envs import Actions
-from logging_config import logging
+from logging_config import logger  # Import the logger from logging_config
 from data_fetcher import fetch_real_time_data
 import time
 
@@ -33,13 +32,13 @@ def execute_trades(env, model, initial_balance, trade_fraction, symbol):
             shares_to_buy = trade_amount / current_price
             shares_held += shares_to_buy
             balance -= trade_amount
-            logging.info(f"{step}: BUY  {shares_to_buy:.2f} shares at ${current_price:.2f} | Balance: ${balance:.2f}")
+            logger.info(f"{step}: BUY  {shares_to_buy:.2f} shares at ${current_price:.2f} | Balance: ${balance:.2f}")
         elif action == Actions.Sell.value and shares_held > 0:
             balance += shares_held * current_price
-            logging.info(f"{step}: SELL {shares_held:.2f} shares at ${current_price:.2f} | Balance: ${balance:.2f}")
+            logger.info(f"{step}: SELL {shares_held:.2f} shares at ${current_price:.2f} | Balance: ${balance:.2f}")
             shares_held = 0
         else:
-            logging.info(f"{step}: HOLD | Current price: ${current_price:.2f} | Balance: ${balance:.2f}")
+            logger.info(f"{step}: HOLD | Current price: ${current_price:.2f} | Balance: ${balance:.2f}")
 
         action_stats[Actions(action)] += 1
         balance_history.append(balance)
@@ -53,10 +52,10 @@ def execute_trades(env, model, initial_balance, trade_fraction, symbol):
 
     if shares_held > 0:
         balance += shares_held * current_price
-        logging.info(f"Final SELL {shares_held:.2f} shares at ${current_price:.2f} | Balance: ${balance:.2f}")
+        logger.info(f"Final SELL {shares_held:.2f} shares at ${current_price:.2f} | Balance: ${balance:.2f}")
         shares_held = 0
 
     env.close()
 
-    logging.info("Action stats: %s", action_stats)
-    logging.info(f"Final Balance: ${balance:.2f}")
+    logger.info("Action stats: %s", action_stats)
+    logger.info(f"Final Balance: ${balance:.2f}")
