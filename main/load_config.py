@@ -7,6 +7,7 @@ with open('config.yaml', 'r') as file:
 # Access parameters
 window_size = config['environment']['window_size']
 total_timesteps = config['environment']['total_timesteps']
+sptd = config['environment']['sptd']
 
 stop_loss = config['risk_management']['stop_loss']
 take_profit = config['risk_management']['take_profit']

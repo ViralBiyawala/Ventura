@@ -3,20 +3,20 @@ from logging_config import logger
 from data_fetcher import fetch_real_time_data
 from environment_creator import update_environment_with_new_data
 import time
+from report_generator import save_balance_history_plot, save_balance_sheet_csv
 
-# trade_executor.py
-def execute_trades(env, model, initial_balance, trade_fraction, symbol, stop_loss=0.85, take_profit=1.05):
+def execute_trades(env, model, initial_balance, trade_fraction, symbol, stop_loss=0.85, take_profit=1.05, report_interval="daily", sptd=390):
     def run_simulation(use_risk_management):
         balance = initial_balance
         balance_history = [balance]
         shares_held = 0
         action_stats = {Actions.Sell: 0, Actions.Buy: 0}
         observation, info = env.reset(seed=2024)
-        shares_hold = 0
-        hold_days = 0
+        liabilities = 0
         entry_price = None  # To track the price at which the position was entered
 
         step = 0
+        report_step = 0  # To track when to generate reports
         while True:
             action, _states = model.predict(observation)
 
@@ -49,22 +49,37 @@ def execute_trades(env, model, initial_balance, trade_fraction, symbol, stop_los
                     shares_held += shares_to_buy
                     balance -= shares_to_buy * current_price
                     entry_price = current_price  # Set the entry price for the position
-                    logger.info(f"{step}: BUY  {shares_to_buy} shares at ${current_price:.2f} | Balance: ${balance:.2f}")
+                    logger.info(f"{step}: BUY {shares_to_buy} shares at ${current_price:.2f} | Balance: ${balance:.2f}")
                 else:
                     logger.info(f"{step}: HOLD (Insufficient funds to buy shares) | Current price: ${current_price:.2f} | Balance: ${balance:.2f}")
             elif action == Actions.Sell.value and shares_held > 0:
                 balance += shares_held * current_price
                 logger.info(f"{step}: SELL {shares_held} shares at ${current_price:.2f} | Balance: ${balance:.2f}")
                 shares_held = 0
-            else:
-                hold_days += 1
-                shares_hold += shares_held
-                logger.info(f"{step}: HOLD {shares_hold} | DAYS {hold_days} | Current price: ${current_price:.2f} | Balance: ${balance:.2f}")
 
             action_stats[Actions(action)] += 1
             balance_history.append(balance)
 
             step += 1
+            report_step += 1
+
+            # Generate balance report and balance sheet at intervals (daily or weekly)
+            if report_interval == "daily" and report_step >= sptd:  # Assuming 390 steps per trading day
+                # save_balance_report(balance_history, action_stats, report_type="daily")
+                save_balance_sheet_csv(balance, shares_held, current_price, liabilities, initial_balance=initial_balance * trade_fraction, report_type="daily")
+                # save_balance_history_plot(balance_history, report_type="daily")
+                report_step = 0
+            elif report_interval == "weekly" and report_step >= (sptd * 5):  # Assuming 5 trading days per week
+                # save_balance_report(balance_history, action_stats, report_type="weekly")
+                save_balance_sheet_csv(balance, shares_held, current_price, liabilities, initial_balance=initial_balance*trade_fraction, report_type="weekly")
+                # save_balance_history_plot(balance_history, report_type="weekly")
+                report_step = 0
+            elif report_interval == "yearly" and report_step >= (sptd * 5 * 12):  # Assuming 5 trading days per week
+                # save_balance_report(balance_history, action_stats, report_type="weekly")
+                save_balance_sheet_csv(balance, shares_held, current_price, liabilities, initial_balance=initial_balance*trade_fraction, report_type="yearly")
+                # save_balance_history_plot(balance_history, report_type="yearly")
+                report_step = 0
+
             if terminated or truncated:
                 break
 
@@ -79,10 +94,5 @@ def execute_trades(env, model, initial_balance, trade_fraction, symbol, stop_los
     balance_with_risk, balance_history_with_risk, action_stats_with_risk = run_simulation(use_risk_management=True)
     logger.info("With Risk Management - Final Balance: ${:.2f}".format(balance_with_risk))
     logger.info("With Risk Management - Action stats: %s", action_stats_with_risk)
-
-    # Run simulation without risk management
-    balance_without_risk, balance_history_without_risk, action_stats_without_risk = run_simulation(use_risk_management=False)
-    logger.info("Without Risk Management - Final Balance: ${:.2f}".format(balance_without_risk))
-    logger.info("Without Risk Management - Action stats: %s", action_stats_without_risk)
 
     env.close()

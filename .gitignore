@@ -5,6 +5,7 @@ __pycache__/
 
 # Temporary files
 temporary/
+reports/
 
 # C extensions
 *.so

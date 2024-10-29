@@ -2,11 +2,12 @@
 environment:
   window_size: 10
   total_timesteps: 1000
+  sptd: 1
 
 model:
   learning_rate: 0.0003
   policy: 'MlpPolicy'
   
 risk_management:
-  stop_loss: 0.02   # 2% stop loss
-  take_profit: 0.05 # 5% take profit
+  stop_loss: 0.80
+  take_profit: 1.05 
