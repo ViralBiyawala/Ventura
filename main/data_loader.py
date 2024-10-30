@@ -8,15 +8,10 @@ def load_data(data_file):
         data = pd.read_csv(data_file, parse_dates=['Date'], index_col='Date').sort_index()
         
         data['Close'] = data['Close'].replace('[\$,]', '', regex=True).astype(float)
-
-        # Simple Moving Average (SMA) - 200-day
-        data['SMA200'] = data['Close'].rolling(window=200).mean()
-
-        # Exponential Moving Average (EMA) - 26-day
-        data['EMA26'] = data['Close'].ewm(span=26, adjust=False).mean()
-
-        # Relative Strength Index (RSI) - 14-day
-        data['RSI14'] = ta.momentum.RSIIndicator(data['Close'], window=14).rsi()
+        data['Low'] = data['Low'].replace('[\$,]', '', regex=True).astype(float)
+        data['High'] = data['High'].replace('[\$,]', '', regex=True).astype(float)
+        data['Open'] = data['Open'].replace('[\$,]', '', regex=True).astype(float)
+        data['Volume'] = data['Volume'].replace('[\$,]', '', regex=True).astype(float)
 
         # Drop NaN values from the start where moving averages can't be calculated
         data.dropna(inplace=True)
