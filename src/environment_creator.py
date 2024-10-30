@@ -1,6 +1,11 @@
+# print curr working directory
+import os
+print(os.getcwd())
+
+from logs.logging_config import logger
 import gymnasium as gym
-from logging_config import logger
 import pandas as pd
+
 
 # environment_creator.py
 def create_environment(env_data, window_size):

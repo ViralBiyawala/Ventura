@@ -1,6 +1,5 @@
 import pandas as pd
-import ta  # Technical Analysis Library
-from logging_config import logger
+from logs.logging_config import logger
 
 # data_loader.py
 def load_data(data_file):

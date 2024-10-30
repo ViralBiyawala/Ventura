@@ -3,7 +3,7 @@ import logging.handlers
 import os
 
 # Create a logs directory if it doesn't exist
-log_directory = 'logs'
+log_directory = '..\logs\logs'
 if not os.path.exists(log_directory):
     os.makedirs(log_directory)
 

@@ -1,7 +1,14 @@
 import yaml
+import os
+
+# Get the absolute path to the current directory
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Construct the absolute path to the config.yaml file
+config_path = os.path.join(current_dir, 'config.yaml')
 
 # Load the config.yaml file
-with open('config.yaml', 'r') as file:
+with open(config_path, 'r') as file:
     config = yaml.safe_load(file)
 
 # Access parameters

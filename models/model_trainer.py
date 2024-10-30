@@ -2,7 +2,7 @@ from stable_baselines3 import PPO, A2C, DDPG, SAC
 
 # model_trainer.py
 def train_model(env, total_timesteps, algorithm='PPO'):
-    from load_config import learning_rate, policy
+    from config.load_config import learning_rate, policy
     
     algorithms = {
         'PPO': PPO,
