@@ -1,18 +1,18 @@
 from gym_anytrading.envs import Actions
 import numpy as np
-from indicators import initialize_indicators
-from price_updater import fetch_and_update_price
-from levels_calculator import calculate_dynamic_levels
-from investment_handler import handle_long_term_investment
-from balance_updater import update_balance_history
-from metrics_calculator import calculate_metrics
+from src.indicators import initialize_indicators
+from src.price_updater import fetch_and_update_price
+from src.levels_calculator import calculate_dynamic_levels
+from src.investment_handler import handle_long_term_investment
+from src.balance_updater import update_balance_history
+from src.metrics_calculator import calculate_metrics
 import sys
 
 from report.report_generator import save_balance_history_plot, save_balance_sheet_csv
 from logs.logging_config import logger
 # File: trade_executor.py
 def execute_trade_action(action, current_price, trade_amount, shares_held, balance, entry_price, wins, losses):
-    if action == Actions.Buy.value:
+    if action == Actions.Buy.value and current_price > 0:
         shares_to_buy = int(trade_amount / current_price) if not np.isnan(trade_amount / current_price) else 0
         if shares_to_buy > 0:
             shares_held += shares_to_buy
