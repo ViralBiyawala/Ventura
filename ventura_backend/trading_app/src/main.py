@@ -1,8 +1,8 @@
-from trade_executor import execute_trades
-from environment_creator import create_environment
-from logs.logging_config import logger
-from models.model_trainer import train_model
-from data.data_loader import load_data
+from .trade_executor import execute_trades
+from .environment_creator import create_environment
+from ..logs.logging_config import logger
+from ..ai_model.model_trainer import train_model
+from ..data.data_loader import load_data
 import cProfile
 import pstats
 
@@ -24,11 +24,4 @@ def main(data_file="../Data/APPLE_DATA.csv", total_timesteps=1000, initial_balan
     execute_trades(env, model, initial_balance, trade_fraction, symbol, report_interval="yearly", sptd=sptd, stop_loss=stop_loss, take_profit=take_profit)
 
 if __name__ == "__main__":
-    # profile = cProfile.Profile()
-    # profile.enable()
     main()
-    # profile.disable()
-    # with open("profile_stats.txt", "w") as f:
-    #     ps = pstats.Stats(profile, stream=f)
-    #     ps.sort_stats(pstats.SortKey.CUMULATIVE)
-    #     ps.print_stats()

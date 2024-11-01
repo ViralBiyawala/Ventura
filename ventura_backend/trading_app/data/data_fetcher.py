@@ -1,7 +1,7 @@
 import os
 import requests
 from dotenv import load_dotenv
-from logs.logging_config import logger
+from ..logs.logging_config import logger
 
 def fetch_real_time_data(symbol):
     return None

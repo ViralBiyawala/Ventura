@@ -1,5 +1,5 @@
-from src.environment_creator import update_environment_with_new_data
-from data.data_fetcher import fetch_real_time_data
+from .environment_creator import update_environment_with_new_data
+from ..data.data_fetcher import fetch_real_time_data
 
 # File: price_updater.py
 def fetch_and_update_price(env, symbol):

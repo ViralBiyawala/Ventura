@@ -1,5 +1,5 @@
 import pandas as pd
-from logs.logging_config import logger
+from ..logs.logging_config import logger
 
 # data_loader.py
 def load_data(data_file):

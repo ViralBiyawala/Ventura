@@ -1,4 +1,4 @@
-from logs.logging_config import logger
+from ..logs.logging_config import logger
 
 # File: investment_handler.py
 def handle_long_term_investment(enable_long_term_investment, long_term_entry_done, long_term_investment, current_price, long_term_shares):

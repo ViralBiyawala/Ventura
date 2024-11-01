@@ -1,8 +1,5 @@
 # print curr working directory
-import os
-print(os.getcwd())
-
-from logs.logging_config import logger
+from ..logs.logging_config import logger
 import gymnasium as gym
 import pandas as pd
 

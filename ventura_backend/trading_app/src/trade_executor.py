@@ -1,17 +1,19 @@
 from gym_anytrading.envs import Actions
 import numpy as np
-from src.indicators import initialize_indicators
-from src.price_updater import fetch_and_update_price
-from src.levels_calculator import calculate_dynamic_levels
-from src.investment_handler import handle_long_term_investment
-from src.balance_updater import update_balance_history
-from src.metrics_calculator import calculate_metrics
+from .indicators import initialize_indicators
+from .price_updater import fetch_and_update_price
+from .levels_calculator import calculate_dynamic_levels
+from .investment_handler import handle_long_term_investment
+from .balance_updater import update_balance_history
+from .metrics_calculator import calculate_metrics
 import sys
 
-from report.report_generator import save_balance_history_plot, save_balance_sheet_csv
-from logs.logging_config import logger
+from ..report.report_generator import save_balance_history_plot, save_balance_sheet_csv
+from ..logs.logging_config import logger
+from ..models import Trade, UserProfile
+
 # File: trade_executor.py
-def execute_trade_action(action, current_price, trade_amount, shares_held, balance, entry_price, wins, losses):
+def execute_trade_action(action, current_price, trade_amount, shares_held, balance, entry_price, wins, losses, user_profile):
     if action == Actions.Buy.value and current_price > 0:
         shares_to_buy = int(trade_amount / current_price) if not np.isnan(trade_amount / current_price) else 0
         if shares_to_buy > 0:
@@ -19,6 +21,14 @@ def execute_trade_action(action, current_price, trade_amount, shares_held, balan
             balance -= shares_to_buy * current_price
             entry_price = current_price
             logger.info(f"BUY {shares_to_buy} shares at ${current_price:.2f} | Balance: ${balance:.2f}")
+            # Store the trade action in the database
+            Trade.objects.create(
+                user_profile=user_profile,
+                symbol="RELIANCE.BSE",  # Assuming symbol for simplicity
+                trade_type="buy",
+                current_price=current_price,
+                quantity=shares_to_buy
+            )
         else:
             logger.info(f"HOLD (Insufficient funds to buy shares) | Current price: ${current_price:.2f} | Balance: ${balance:.2f}")
     elif action == Actions.Sell.value and shares_held > 0:
@@ -28,11 +38,19 @@ def execute_trade_action(action, current_price, trade_amount, shares_held, balan
             losses += 1
         balance += shares_held * current_price
         logger.info(f"SELL {shares_held} shares at ${current_price:.2f} | Balance: ${balance:.2f}")
+        # Store the trade action in the database
+        Trade.objects.create(
+            user_profile=user_profile,
+            symbol="RELIANCE.BSE",  # Assuming symbol for simplicity
+            trade_type="sell",
+            current_price=current_price,
+            quantity=shares_held
+        )
         shares_held = 0
     return shares_held, balance, entry_price, wins, losses
 
 # File: trade_executor.py
-def execute_trades(env, model, initial_balance, trade_fraction, symbol, stop_loss=0.95, take_profit=1.05, report_interval="daily", sptd=390, enable_long_term_investment=True):
+def execute_trades(env, model, initial_balance, trade_fraction, symbol, stop_loss=0.95, take_profit=1.05, report_interval="daily", sptd=390, enable_long_term_investment=True, user_profile=None):
     balance = initial_balance
     balance_history = [balance]
     shares_held = 0
@@ -77,7 +95,7 @@ def execute_trades(env, model, initial_balance, trade_fraction, symbol, stop_los
                 shares_held = 0
                 wins += 1
 
-        shares_held, balance, entry_price, wins, losses = execute_trade_action(action, current_price, trade_amount, shares_held, balance, entry_price, wins, losses)
+        shares_held, balance, entry_price, wins, losses = execute_trade_action(action, current_price, trade_amount, shares_held, balance, entry_price, wins, losses, user_profile)
         action_stats[Actions(action)] += 1
 
         balance_history = update_balance_history(balance_history, balance)
