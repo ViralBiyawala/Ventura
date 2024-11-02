@@ -55,3 +55,19 @@ button {
 button:hover {
     background-color: #0056b3;
 }
+
+.portfolio-container {
+    margin-top: 20px;
+}
+
+.portfolio-item {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+
+.portfolio-item p {
+    margin: 5px 0;
+}

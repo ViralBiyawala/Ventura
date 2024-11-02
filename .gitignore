@@ -7,7 +7,8 @@ __pycache__/
 temporary/
 reports/
 .vscode/
-
+*.rdb
+ 
 # C extensions
 *.so
 

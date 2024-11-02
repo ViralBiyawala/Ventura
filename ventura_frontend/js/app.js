@@ -1,4 +1,7 @@
-import { register, login, fetchPortfolio } from './api.js';
+import { register, login } from './api.js';
+import { fetchPortfolio, fetchInvestmentSettings, startPortfolioUpdateInterval } from './dashboard.js';
+import { fetchPortfolioData } from './portfolio.js';
+import { fetchLiveTrades, visualizeLiveTrade } from './liveTrade.js';
 
 document.addEventListener('DOMContentLoaded', function () {
     const mainContent = document.getElementById('main-content');
@@ -6,6 +9,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const dashboardLink = document.getElementById('dashboard-link');
     const registerLink = document.getElementById('register-link');
     const profileLink = document.getElementById('profile-link');
+    const portfolioLink = document.getElementById('portfolio-link');
+    const liveTradeLink = document.getElementById('live-trade-link');
 
     loginLink.addEventListener('click', function () {
         loadLogin();
@@ -23,7 +28,14 @@ document.addEventListener('DOMContentLoaded', function () {
         loadProfile();
     });
 
-    // Check if the user is already logged in
+    portfolioLink.addEventListener('click', function () {
+        loadPortfolio();
+    });
+
+    liveTradeLink.addEventListener('click', function () {
+        loadLiveTrade();
+    });
+
     const token = localStorage.getItem('token');
     if (token) {
         showAuthenticatedLinks();
@@ -38,6 +50,8 @@ function showAuthenticatedLinks() {
     document.getElementById('register-link').style.display = 'none';
     document.getElementById('dashboard-link').style.display = 'inline';
     document.getElementById('profile-link').style.display = 'inline';
+    document.getElementById('portfolio-link').style.display = 'inline';
+    document.getElementById('live-trade-link').style.display = 'inline';
 }
 
 function hideAuthenticatedLinks() {
@@ -45,6 +59,8 @@ function hideAuthenticatedLinks() {
     document.getElementById('register-link').style.display = 'inline';
     document.getElementById('dashboard-link').style.display = 'none';
     document.getElementById('profile-link').style.display = 'none';
+    document.getElementById('portfolio-link').style.display = 'none';
+    document.getElementById('live-trade-link').style.display = 'none';
 }
 
 function loadLogin() {
@@ -125,16 +141,27 @@ async function handleLogin() {
     }
 }
 
-function loadDashboard() {
+async function loadDashboard() {
     const mainContent = document.getElementById('main-content');
     mainContent.innerHTML = `
         <h2>Dashboard</h2>
-        <div id="portfolio"></div>
-        <button onclick="initiateTrade()">Initiate Trade</button>
+        <button id="initiate-trade-button">Initiate Trade</button>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Symbol</th>
+                    <th>Amount</th>
+                    <th>Live Trading Percentage</th>
+                    <th>Duration (days)</th>
+                    <th>Start Date</th>
+                </tr>
+            </thead>
+            <tbody id="investment-settings-table">
+            </tbody>
+        </table>
     `;
-
-    const token = localStorage.getItem('token');
-    fetchPortfolio(token);
+    document.getElementById('initiate-trade-button').addEventListener('click', initiateTrade);
+    await fetchInvestmentSettings();
 }
 
 function loadProfile() {
@@ -203,5 +230,116 @@ function handleDeleteProfile() {
 }
 
 function initiateTrade() {
-    alert('Trade initiated!');
+    // Remove existing modal if it's in the DOM
+    const existingModal = document.getElementById('tradeModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+
+    // Inject new modal HTML into the DOM
+    const mainContent = document.getElementById('main-content');
+    const modalHTML = `
+        <div class="modal fade" id="tradeModal" tabindex="-1" aria-labelledby="tradeModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="tradeModalLabel">Initiate Trade</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="trade-form">
+                            <div class="mb-3">
+                                <label for="symbol" class="form-label">Symbol</label>
+                                <input type="text" class="form-control" id="symbol" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="amount" class="form-label">Amount</label>
+                                <input type="number" class="form-control" id="amount" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="trade-fraction" class="form-label">Trade Fraction</label>
+                                <input type="number" class="form-control" id="trade-fraction" step="0.01" min="0" max="1" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="duration" class="form-label">Duration (days)</label>
+                                <input type="number" class="form-control" id="duration" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Start Trading</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    mainContent.insertAdjacentHTML('beforeend', modalHTML);
+
+    // Add form submit handler
+    const tradeForm = document.getElementById('trade-form');
+    tradeForm.addEventListener('submit', handleTradeFormSubmit);
+
+    // Initialize and show the modal
+    const tradeModalElement = document.getElementById('tradeModal');
+    const tradeModal = new bootstrap.Modal(tradeModalElement);
+    tradeModal.show();
+
+    // Clean up modal from the DOM when closed
+    tradeModalElement.addEventListener('hidden.bs.modal', function () {
+        tradeModalElement.remove();
+    });
+}
+
+async function handleTradeFormSubmit(e) {
+    e.preventDefault();
+    const symbol = document.getElementById('symbol').value;
+    const amount = document.getElementById('amount').value;
+    const tradeFraction = document.getElementById('trade-fraction').value;
+    const duration = document.getElementById('duration').value;
+
+    const token = localStorage.getItem('token');
+    const response = await fetch('http://localhost:8000/api/start-trading/', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            symbol,
+            amount,
+            trade_fraction: tradeFraction,
+            duration_days: duration
+        })
+    });
+
+    if (response.ok) {
+        alert('Trade initiated successfully!');
+        const modal = bootstrap.Modal.getInstance(document.getElementById('tradeModal'));
+        modal.hide();
+    } else {
+        alert('Failed to initiate trade.');
+    }
+}
+
+function loadPortfolio() {
+    const mainContent = document.getElementById('main-content');
+    mainContent.innerHTML = `
+        <h2>Portfolio</h2>
+        <div id="balance">Balance: $0.00</div>
+        <div id="portfolio" class="portfolio-container"></div>
+    `;
+    fetchPortfolio();
+    startPortfolioUpdateInterval();
+}
+
+function loadLiveTrade() {
+    const mainContent = document.getElementById('main-content');
+    mainContent.innerHTML = `
+        <h2>Live Trade</h2>
+        <select id="live-trades-select"></select>
+        <div id="live-trade-visualization"></div>
+    `;
+    fetchLiveTrades();
+    document.getElementById('live-trades-select').addEventListener('change', function () {
+        const tradeId = this.value;
+        visualizeLiveTrade(tradeId);
+    });
 }

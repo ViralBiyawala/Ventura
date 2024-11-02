@@ -1,9 +1,12 @@
 import pandas as pd
 from ..logs.logging_config import logger
+import os
 
 # data_loader.py
 def load_data(data_file):
     try:
+        data_file = os.path.join(os.path.dirname(__file__), data_file)
+        print(data_file)
         data = pd.read_csv(data_file, parse_dates=['Date'], index_col='Date').sort_index()
         
         data['Close'] = data['Close'].replace('[\$,]', '', regex=True).astype(float)

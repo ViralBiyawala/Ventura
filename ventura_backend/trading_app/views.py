@@ -8,8 +8,9 @@ from .serializers import UserSerializer, InvestmentSettingsSerializer, TradeSeri
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.models import User
 from django.http import JsonResponse
-from .src.main import main as start_trading  # Adjusted import path
-from datetime import datetime
+from .tasks import start_trading_task  # Ensure this import is correct
+from datetime import datetime, timedelta
+from .logs.logging_config import logger
 
 class RegisterView(APIView):
     permission_classes = [AllowAny]
@@ -40,8 +41,8 @@ class InvestmentSettingsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        investment = InvestmentSettings.objects.filter(user_profile__user=request.user).first()
-        serializer = InvestmentSettingsSerializer(investment)
+        investment_settings = InvestmentSettings.objects.filter(user_profile__user=request.user)
+        serializer = InvestmentSettingsSerializer(investment_settings, many=True)
         return Response(serializer.data)
 
     def post(self, request):
@@ -63,38 +64,39 @@ class PortfolioView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        try:
-            portfolio = Portfolio.objects.get(user_profile__user=request.user)
-            serializer = PortfolioSerializer(portfolio)
-            return Response(serializer.data)
-        except Portfolio.DoesNotExist:
-            return Response({"error": "Portfolio does not exist"}, status=status.HTTP_404_NOT_FOUND)
+        portfolio = Portfolio.objects.filter(user_profile__user=request.user)
+        serializer = PortfolioSerializer(portfolio, many=True)
+        return Response(serializer.data)
 
 class StartTradingView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        data_file = request.data.get("data_file", "../Data/APPLE_DATA.csv")
+        data_file = request.data.get("data_file", "APPLE_DATA.csv")
         total_timesteps = int(request.data.get("total_timesteps", 1000))
-        initial_balance = float(request.data.get("initial_balance", 100000))
-        trade_fraction = float(request.data.get("trade_fraction", 0.7))
-        symbol = request.data.get("symbol", "RELIANCE.BSE")
+        initial_balance = float(request.data.get("amount"))
+        trade_fraction = float(request.data.get("trade_fraction"))
+        symbol = request.data.get("symbol")
         window_size = int(request.data.get("window_size", 14))
         sptd = int(request.data.get("sptd", 390))
+        duration_days = int(request.data.get("duration_days"))
 
         # Store the investment settings in the database
         user_profile = request.user.userprofile
         investment_settings = InvestmentSettings.objects.create(
             user_profile=user_profile,
+            symbol=symbol,
             amount=initial_balance,
             live_trading_percentage=trade_fraction,
             long_term_percentage=1 - trade_fraction,
-            duration_days=total_timesteps,
+            duration_days=duration_days,
             start_date=datetime.now()
         )
 
-        # Start the trading process
-        start_trading(data_file, total_timesteps, initial_balance, trade_fraction, symbol, window_size, sptd, user_profile=user_profile)
+        # Start the trading process asynchronously
+        logger.info("Starting trading process asynchronously.")
+        start_trading_task.delay(data_file, total_timesteps, initial_balance, trade_fraction, symbol, window_size, sptd, user_profile.id)
+        logger.info("Task has been scheduled.")
 
         return JsonResponse({"status": "Trading started successfully"})
 
@@ -110,3 +112,29 @@ class UserProfileView(APIView):
         user = request.user
         user.delete()
         return Response({"success": True, "message": "User profile deleted successfully"}, status=status.HTTP_200_OK)
+
+class DailyBalanceView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user_profile = request.user.userprofile
+        portfolios = Portfolio.objects.filter(user_profile=user_profile).order_by('updated_at')
+        data = [{"date": portfolio.updated_at.date(), "balance": portfolio.market_value} for portfolio in portfolios]
+        return Response(data)
+
+class LiveTradeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user_profile = request.user.userprofile
+        trades = Trade.objects.filter(user_profile=user_profile).order_by('-timestamp')
+        data = [{"id": trade.id, "symbol": trade.symbol, "trade_type": trade.trade_type, "price": trade.current_price, "quantity": trade.quantity, "timestamp": trade.timestamp} for trade in trades]
+        return Response(data)
+
+class TradeListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        trades = Trade.objects.filter(user_profile__user=request.user)
+        serializer = TradeSerializer(trades, many=True)
+        return Response(serializer.data)

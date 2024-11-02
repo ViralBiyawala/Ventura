@@ -10,10 +10,10 @@ import sys
 
 from ..report.report_generator import save_balance_history_plot, save_balance_sheet_csv
 from ..logs.logging_config import logger
-from ..models import Trade, UserProfile
+from ..models import Trade, UserProfile, Portfolio
 
 # File: trade_executor.py
-def execute_trade_action(action, current_price, trade_amount, shares_held, balance, entry_price, wins, losses, user_profile):
+def execute_trade_action(action, current_price, trade_amount, shares_held, balance, entry_price, wins, losses, user_profile, symbol=None):
     if action == Actions.Buy.value and current_price > 0:
         shares_to_buy = int(trade_amount / current_price) if not np.isnan(trade_amount / current_price) else 0
         if shares_to_buy > 0:
@@ -24,9 +24,9 @@ def execute_trade_action(action, current_price, trade_amount, shares_held, balan
             # Store the trade action in the database
             Trade.objects.create(
                 user_profile=user_profile,
-                symbol="RELIANCE.BSE",  # Assuming symbol for simplicity
+                symbol=symbol,  # Assuming symbol for simplicity
                 trade_type="buy",
-                current_price=current_price,
+                current_price=float(current_price),
                 quantity=shares_to_buy
             )
         else:
@@ -41,12 +41,16 @@ def execute_trade_action(action, current_price, trade_amount, shares_held, balan
         # Store the trade action in the database
         Trade.objects.create(
             user_profile=user_profile,
-            symbol="RELIANCE.BSE",  # Assuming symbol for simplicity
+            symbol=symbol,  # Assuming symbol for simplicity
             trade_type="sell",
-            current_price=current_price,
+            current_price=float(current_price),
             quantity=shares_held
         )
         shares_held = 0
+    # Update portfolio balance
+    portfolio, created = Portfolio.objects.get_or_create(user_profile=user_profile)
+    portfolio.market_value = balance
+    portfolio.save()
     return shares_held, balance, entry_price, wins, losses
 
 # File: trade_executor.py
@@ -95,7 +99,7 @@ def execute_trades(env, model, initial_balance, trade_fraction, symbol, stop_los
                 shares_held = 0
                 wins += 1
 
-        shares_held, balance, entry_price, wins, losses = execute_trade_action(action, current_price, trade_amount, shares_held, balance, entry_price, wins, losses, user_profile)
+        shares_held, balance, entry_price, wins, losses = execute_trade_action(action, current_price, trade_amount, shares_held, balance, entry_price, wins, losses, user_profile, symbol)
         action_stats[Actions(action)] += 1
 
         balance_history = update_balance_history(balance_history, balance)
@@ -116,6 +120,10 @@ def execute_trades(env, model, initial_balance, trade_fraction, symbol, stop_los
     if enable_long_term_investment and long_term_shares > 0:
         balance += long_term_shares * current_price
         logger.info(f"Long-term SELL {long_term_shares} shares at ${current_price:.2f} | Balance: ${balance:.2f}")
+
+    portfolio, created = Portfolio.objects.get_or_create(user_profile=user_profile)
+    portfolio.market_value = balance
+    portfolio.save()
 
     total_return, sharpe_ratio, win_loss_ratio = calculate_metrics(balance_history, initial_balance, balance, wins, losses)
 
