@@ -1,7 +1,7 @@
 import { register, login } from './api.js';
 import { fetchInvestmentSettings } from './dashboard.js';
 import { fetchPortfolioData } from './portfolio.js';
-// import { fetchLiveTrades, visualizeLiveTrade } from './liveTrade.js';
+import { fetchInvestmentSettings } from './liveTrade.js';
 
 // Helper functions to save and load the last API call details
 function saveLastApiCall(callName, params = []) {
@@ -85,14 +85,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Re-hit the last "GET" API every 60 seconds if it exists
-    setInterval(function () {
-        const lastCall = getLastApiCall();
-        const lastParams = getLastApiParams();
+    // setInterval(function () {
+    //     const lastCall = getLastApiCall();
+    //     const lastParams = getLastApiParams();
 
-        if (lastCall && functionMapping[lastCall] && (lastCall.startsWith('loadPortfolio') || lastCall.startsWith('loadLiveTrade'))) {
-            functionMapping[lastCall](...lastParams);
-        }
-    }, 1000);
+    //     if (lastCall && functionMapping[lastCall] && (lastCall.startsWith('loadPortfolio') || lastCall.startsWith('loadLiveTrade'))) {
+    //         functionMapping[lastCall](...lastParams);
+    //     }
+    // }, 60000);
 });
 
 function showAuthenticatedLinks() {
@@ -210,7 +210,7 @@ function loadDashboard() {
             </tbody>
         </table>
     `;
-    document.getElementById('initiate-trade-button').addEventListener('click', initiateTrade);
+    document.getElementById('initiate-trade-button').addEventListener('click', handleTradeFormSubmit);
 
     fetchInvestmentSettings();
 }
@@ -320,29 +320,33 @@ function initiateTrade() {
             </div>
         </div>
     `;
-    mainContent.insertAdjacentHTML('beforeend', modalHTML);
 
     // Add form submit handler
-    const tradeForm = document.getElementById('trade-form');
+    const tradeForm = document.getElementById('initiate-trade-button');
     tradeForm.addEventListener('submit', handleTradeFormSubmit);
 
     // Initialize and show the modal
-    const tradeModalElement = document.getElementById('tradeModal');
-    const tradeModal = new bootstrap.Modal(tradeModalElement);
-    tradeModal.show();
+    // const tradeModalElement = document.getElementById('tradeModal');
+    // const tradeModal = new bootstrap.Modal(tradeModalElement);
+    // tradeModal.show();
 
-    // Clean up modal from the DOM when closed
-    tradeModalElement.addEventListener('hidden.bs.modal', function () {
-        tradeModalElement.remove();
-    });
+    // // Clean up modal from the DOM when closed
+    // tradeModalElement.addEventListener('hidden.bs.modal', function () {
+    //     tradeModalElement.remove();
+    // });
 }
 
 async function handleTradeFormSubmit(e) {
     e.preventDefault();
-    const symbol = document.getElementById('symbol').value;
-    const amount = document.getElementById('amount').value;
-    const tradeFraction = document.getElementById('trade-fraction').value;
-    const duration = document.getElementById('duration').value;
+    // const symbol = document.getElementById('symbol').value;
+    // const amount = document.getElementById('amount').value;
+    // const tradeFraction = document.getElementById('trade-fraction').value;
+    // const duration = document.getElementById('duration').value;
+
+    const symbol = 'AAPLYI';
+    const amount = 999;
+    const tradeFraction = 0.5;
+    const duration = 30;
 
     const token = localStorage.getItem('token');
     const response = await fetch('http://localhost:8000/api/start-trading/', {
@@ -361,8 +365,8 @@ async function handleTradeFormSubmit(e) {
 
     if (response.ok) {
         alert('Trade initiated successfully!');
-        const modal = bootstrap.Modal.getInstance(document.getElementById('tradeModal'));
-        modal.hide();
+        // const modal = bootstrap.Modal.getInstance(document.getElementById('tradeModal'));
+        // modal.hide();
     } else {
         alert('Failed to initiate trade.');
     }
@@ -381,7 +385,18 @@ function loadLiveTrade() {
     const mainContent = document.getElementById('main-content');
     mainContent.innerHTML = `
         <h2>Live Trade</h2>
-        <p>Visualize live trading data here.</p>
+        <div class="mb-3">
+            <label for="live-trades-select" class="form-label">Select Stock</label>
+            <select id="live-trades-select" class="form-select"></select>
+        </div>
         <canvas id="live-trade-chart" width="400" height="200"></canvas>
     `;
+
+    fetchLiveTradeSettings();
+
+    const liveTradesSelect = document.getElementById('live-trades-select');
+    liveTradesSelect.addEventListener('change', function () {
+        const selectedSymbol = liveTradesSelect.value;
+        visualizeLiveTrade(selectedSymbol);
+    });
 }

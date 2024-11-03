@@ -8,9 +8,12 @@ from .serializers import UserSerializer, InvestmentSettingsSerializer, TradeSeri
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.models import User
 from django.http import JsonResponse
-from .tasks import start_trading_task  # Ensure this import is correct
+# from .tasks import start_trading_task  # Ensure this import is correct
+from .src.main import main as start_trading
 from datetime import datetime, timedelta
 from .logs.logging_config import logger
+from celery import current_app
+from django.shortcuts import render
 
 class RegisterView(APIView):
     permission_classes = [AllowAny]
@@ -95,7 +98,8 @@ class StartTradingView(APIView):
 
         # Start the trading process asynchronously
         logger.info("Starting trading process asynchronously.")
-        start_trading_task.delay(data_file, total_timesteps, initial_balance, trade_fraction, symbol, window_size, sptd, user_profile.id)
+        # start_trading_task.delay(data_file, total_timesteps, initial_balance, trade_fraction, symbol, window_size, sptd, user_profile.id)
+        start_trading(data_file, total_timesteps, initial_balance, trade_fraction, symbol, window_size, sptd, user_profile)
         logger.info("Task has been scheduled.")
 
         return JsonResponse({"status": "Trading started successfully"})
@@ -138,3 +142,11 @@ class TradeListView(APIView):
         trades = Trade.objects.filter(user_profile__user=request.user)
         serializer = TradeSerializer(trades, many=True)
         return Response(serializer.data)
+
+# New view for the index page to load the frontend
+
+class IndexView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        return render(request, 'index.html')

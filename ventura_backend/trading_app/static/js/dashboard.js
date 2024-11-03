@@ -1,4 +1,3 @@
-// ...existing code...
 export async function fetchInvestmentSettings() {
     const token = localStorage.getItem('token');
     try {
@@ -56,27 +55,5 @@ export async function initiateTrade(tradeData) {
     } catch (error) {
         console.error('Error initiating trade:', error);
         alert('Failed to initiate trade.');
-    }
-}
-
-export async function visualizeLiveTrade(tradeId) {
-    const token = localStorage.getItem('token');
-    try {
-        const response = await fetch(`http://localhost:8000/api/trades/${tradeId}/`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-
-        if (response.ok) {
-            const tradeData = await response.json();
-            // Implement visualization logic here using tradeData
-        } else {
-            alert('Failed to fetch trade data.');
-        }
-    } catch (error) {
-        console.error('Error fetching trade data:', error);
-        alert('Failed to fetch trade data.');
     }
 }

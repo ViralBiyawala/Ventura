@@ -1,4 +1,4 @@
-export async function fetchLiveTrades() {
+export async function fetchInvestmentSettings() {
     const token = localStorage.getItem('token');
     try {
         const response = await fetch('http://localhost:8000/api/investment-settings/', {
@@ -13,7 +13,7 @@ export async function fetchLiveTrades() {
             if (Array.isArray(investmentSettingsData)) {
                 const liveTradesSelect = document.getElementById('live-trades-select');
                 liveTradesSelect.innerHTML = investmentSettingsData.map(setting => `
-                    <option value="${setting.id}">${setting.symbol}</option>
+                    <option value="${setting.symbol}">${setting.symbol}</option>
                 `).join('');
             } else {
                 alert('Invalid investment settings data.');
@@ -27,10 +27,10 @@ export async function fetchLiveTrades() {
     }
 }
 
-export async function visualizeLiveTrade(tradeId) {
+export async function visualizeLiveTrade(symbol) {
     const token = localStorage.getItem('token');
     try {
-        const response = await fetch(`http://localhost:8000/api/trades/${tradeId}/`, {
+        const response = await fetch(`http://localhost:8000/api/live-trades/?symbol=${symbol}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -39,7 +39,36 @@ export async function visualizeLiveTrade(tradeId) {
 
         if (response.ok) {
             const tradeData = await response.json();
-            // Implement visualization logic here using tradeData
+            const labels = tradeData.map(trade => new Date(trade.timestamp).toLocaleTimeString());
+            const prices = tradeData.map(trade => trade.price);
+
+            const ctx = document.getElementById('live-trade-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: `Live Trade Data for ${symbol}`,
+                        data: prices,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1,
+                        fill: false
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'minute'
+                            }
+                        },
+                        y: {
+                            beginAtZero: false
+                        }
+                    }
+                }
+            });
         } else {
             alert('Failed to fetch trade data.');
         }

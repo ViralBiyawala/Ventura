@@ -1,6 +1,6 @@
 # trading_app/urls.py
 from django.urls import path
-from .views import RegisterView, LoginView, InvestmentSettingsView, TradeLogView, PortfolioView, StartTradingView, UserProfileView, LiveTradeView, TradeListView
+from .views import RegisterView, LoginView, InvestmentSettingsView, TradeLogView, PortfolioView, StartTradingView, UserProfileView, LiveTradeView, TradeListView, IndexView
 
 urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'),
@@ -12,4 +12,5 @@ urlpatterns = [
     path('profile/', UserProfileView.as_view(), name='profile'),  # New URL for user profile
     path('live-trades/', LiveTradeView.as_view(), name='live-trades'),  # New URL for live trades
     path('trades/', TradeListView.as_view(), name='trades'),  # New URL for trades
+    path('', IndexView.as_view(), name='index'),  # New URL for index view
 ]
