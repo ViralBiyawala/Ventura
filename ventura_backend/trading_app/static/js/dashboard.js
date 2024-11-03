@@ -14,11 +14,12 @@ export async function fetchInvestmentSettings() {
                 const investmentSettingsTable = document.getElementById('investment-settings-table');
                 investmentSettingsTable.innerHTML = investmentSettings.map(setting => `
                     <tr>
-                        <td>${setting.symbol}</td>
-                        <td>${setting.amount}</td>
-                        <td>${setting.live_trading_percentage}</td>
-                        <td>${setting.duration_days}</td>
-                        <td>${setting.start_date}</td>
+                        <td><span class="gradient-text">${setting.symbol}</span></td>
+                        <td>$${setting.amount.toLocaleString()}</td>
+                        <td>${setting.live_trading_percentage}%</td>
+                        <td>${setting.duration_days} days</td>
+                        <td>${new Date(setting.start_date).toLocaleDateString()}</td>
+                        <td><span class="badge bg-success">Active</span></td>
                     </tr>
                 `).join('');
             } else {
@@ -32,7 +33,52 @@ export async function fetchInvestmentSettings() {
         alert('Failed to fetch investment settings.', error);
     }
 }
-// ...existing code...
+
+export function loadDashboard() {
+    const mainContent = document.getElementById('main-content');
+    mainContent.innerHTML = `
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Investment</h3>
+                <div class="value">$25,420.00</div>
+            </div>
+            <div class="stat-card">
+                <h3>Active Trades</h3>
+                <div class="value">12</div>
+            </div>
+            <div class="stat-card">
+                <h3>Total Profit</h3>
+                <div class="value gradient-text">+$1,240.50</div>
+            </div>
+            <div class="stat-card">
+                <h3>Success Rate</h3>
+                <div class="value">78%</div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Investment Settings</h2>
+                <button id="initiate-trade-button" class="btn-primary">Initiate Trade</button>
+            </div>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Amount</th>
+                            <th>Live Trading %</th>
+                            <th>Duration</th>
+                            <th>Start Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="investment-settings-table">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+}
 
 export async function initiateTrade(tradeData) {
     const token = localStorage.getItem('token');

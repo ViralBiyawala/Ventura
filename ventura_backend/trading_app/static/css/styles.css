@@ -1,71 +1,280 @@
+:root {
+    --primary-bg: #f5f5f5;
+    --secondary-bg: #ffffff;
+    --card-bg: #ffffff;
+    --accent-purple: #6C5DD3;
+    --accent-blue: #3E97FF;
+    --accent-green: #50CD89;
+    --text-primary: #000000;
+    --text-secondary: #666666;
+    --gradient-primary: linear-gradient(90deg, #6C5DD3 0%, #3E97FF 100%);
+}
+
 /* Basic styling for layout */
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Roboto', sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f4f4f4;
+    background-color: var(--primary-bg);
+    color: var(--text-primary);
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
 /* Header styling */
 header {
-    background-color: #007bff;
-    color: white;
-    padding: 1rem;
-    text-align: center;
+    background-color: var(--secondary-bg);
+    padding: 1rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .logo {
-    width: 50px;
+    width: 40px;
     height: auto;
-    vertical-align: middle;
-    margin-right: 10px;
+}
+
+nav {
+    display: flex;
+    gap: 1.5rem;
 }
 
 nav a {
-    color: white;
-    margin: 0 1rem;
+    color: var(--text-secondary);
     text-decoration: none;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+nav a:hover {
+    color: var(--text-primary);
+    background: rgba(192, 189, 214, 0.831);
 }
 
 main {
-    padding: 1rem;
-    padding-bottom: 5rem; /* Add padding to the bottom */
+    flex: 1;
+    padding: 2rem;
+    max-width: 2400px;
+    margin: 0 auto;
+}
+
+/* Card styling */
+.card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 /* Footer styling */
 footer {
     text-align: center;
     padding: 1rem;
-    background-color: #007bff;
-    color: white;
-    /* Remove fixed position */
+    background-color: var(--secondary-bg);
+    color: var(--text-primary);
+    position: relative;
+    bottom: 0;
+    width: 100%;
+    margin-top: auto;
 }
 
+/* Button styling */
 button {
-    background-color: #007bff;
+    background: var(--gradient-primary);
     color: white;
     border: none;
-    padding: 10px;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 600;
     cursor: pointer;
-    border-radius: 5px;
+    transition: all 0.3s ease;
 }
 
 button:hover {
-    background-color: #0056b3;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(108, 93, 211, 0.4);
 }
 
+button:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5);
+}
+
+/* Form styling */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-group {
+    position: relative;
+}
+
+input, select {
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--secondary-bg);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+input:focus, select:focus {
+    border-color: var(--accent-purple);
+    outline: none;
+}
+
+form button {
+    align-self: flex-start;
+}
+
+/* Table styling */
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 8px;
+}
+
+table th, table td {
+    padding: 10px;
+    border: 1px solid #444;
+    text-align: left;
+}
+
+table th {
+    background: transparent;
+    color: var(--text-secondary);
+    font-weight: 500;
+    padding: 1rem;
+    text-align: left;
+}
+
+table td {
+    background: var(--card-bg);
+    padding: 1rem;
+}
+
+table tr td:first-child {
+    border-radius: 12px 0 0 12px;
+}
+
+table tr td:last-child {
+    border-radius: 0 12px 12px 0;
+}
+
+/* Portfolio styling */
 .portfolio-container {
-    margin-top: 20px;
+    gap: 1.5rem;
+    justify-content: center;
+    max-width: 1200px;
+    margin: 2rem auto;
+    background: var(--card-bg);
+    border-radius: 16px;
 }
 
 .portfolio-item {
-    background-color: #fff;
-    border: 1px solid #ddd;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 5px;
+    background: var(--card-bg);
+    color: var(--text-primary);
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.portfolio-item h2 {
+    margin-bottom: 1rem;
+    color: var(--accent-purple);
 }
 
 .portfolio-item p {
-    margin: 5px 0;
+    margin: 0.5rem 0;
+    color: var(--text-secondary);
+}
+
+/* Chart styling */
+.chart-container {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+#live-trade-chart {
+    /* display horizontally center */
+    margin: 0 auto;
+    width: 80% !important;
+    height: 300px !important;
+    margin-top: 1rem;
+}
+
+/* Stats cards */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.stat-card h3 {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+}
+
+.stat-card .value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Gradient text */
+.gradient-text {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Profile styling */
+.profile {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: var(--card-bg);
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.profile h2 {
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+}
+
+.profile p {
+    margin: 0.5rem 0;
+    color: var(--text-secondary);
+}
+
+.profile-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
 }

@@ -67,6 +67,7 @@ document.addEventListener('DOMContentLoaded', function () {
         loadLiveTrade();
     });
 
+    
     const token = localStorage.getItem('token');
     
     if (token) {
@@ -95,6 +96,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // }, 60000);
 });
 
+
 function showAuthenticatedLinks() {
     document.getElementById('login-link').style.display = 'none';
     document.getElementById('register-link').style.display = 'none';
@@ -116,12 +118,18 @@ function hideAuthenticatedLinks() {
 function loadLogin() {
     const mainContent = document.getElementById('main-content');
     mainContent.innerHTML = `
-        <h2>Login</h2>
-        <form id="login-form">
-            <input type="text" id="username" placeholder="Username" required>
-            <input type="password" id="password" placeholder="Password" required>
-            <button type="submit">Login</button>
-        </form>
+        <div class="card" style="max-width: 400px; margin: 2rem auto;">
+            <h2 class="text-center mb-4">Login</h2>
+            <form id="login-form">
+                <div class="form-group">
+                    <input type="text" id="username" placeholder="Username" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="password" placeholder="Password" required>
+                </div>
+                <button type="submit" class="w-100">Login</button>
+            </form>
+        </div>
     `;
 
     const loginForm = document.getElementById('login-form');
@@ -157,13 +165,21 @@ async function handleRegister() {
 function loadRegister() {
     const mainContent = document.getElementById('main-content');
     mainContent.innerHTML = `
-        <h2>Register</h2>
-        <form id="register-form">
-            <input type="text" id="username" placeholder="Username" required>
-            <input type="password" id="password" placeholder="Password" required>
-            <input type="password" id="confirm-password" placeholder="Confirm Password" required>
-            <button type="submit">Register</button>
-        </form>
+        <div class="card" style="max-width: 400px; margin: 2rem auto;">
+            <h2 class="text-center mb-4">Register</h2>
+            <form id="register-form">
+                <div class="form-group">
+                    <input type="text" id="username" placeholder="Username" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="password" placeholder="Password" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="confirm-password" placeholder="Confirm Password" required>
+                </div>
+                <button type="submit" class="w-100">Register</button>
+            </form>
+        </div>
     `;
 
     const registerForm = document.getElementById('register-form');
@@ -194,8 +210,10 @@ async function handleLogin() {
 function loadDashboard() {
     const mainContent = document.getElementById('main-content');
     mainContent.innerHTML = `
-        <h2>Dashboard</h2>
-        <button id="initiate-trade-button">Initiate Trade</button>
+        <div class="d-flex justify-content-between align-items-center">
+            <h2>Dashboard</h2>
+            <button id="initiate-trade-button" class="btn btn-primary">Initiate Trade</button>
+        </div>
         <table class="table">
             <thead>
                 <tr>
@@ -204,6 +222,7 @@ function loadDashboard() {
                     <th>Live Trading Percentage</th>
                     <th>Duration (days)</th>
                     <th>Start Date</th>
+                    <th>Status</th>
                 </tr>
             </thead>
             <tbody id="investment-settings-table">
@@ -234,10 +253,14 @@ function loadProfile() {
     })
     .then(data => {
         mainContent.innerHTML = `
-            <h2>Profile</h2>
-            <p>Username: ${data.username}</p>
-            <button id="logout-button">Logout</button>
-            <button id="delete-profile-button">Delete Profile</button>
+            <div class="profile card">
+                <h2>Profile</h2>
+                <p><strong>Username:</strong> ${data.username}</p>
+                <div class="profile-actions">
+                    <button id="logout-button" class="btn btn-danger">Logout</button>
+                    <button id="delete-profile-button" class="btn btn-danger">Delete Profile</button>
+                </div>
+            </div>
         `;
 
         document.getElementById('logout-button').addEventListener('click', handleLogout);
@@ -320,33 +343,34 @@ function initiateTrade() {
             </div>
         </div>
     `;
+    mainContent.insertAdjacentHTML('beforeend', modalHTML);
 
     // Add form submit handler
-    const tradeForm = document.getElementById('initiate-trade-button');
+    const tradeForm = document.getElementById('trade-form');
     tradeForm.addEventListener('submit', handleTradeFormSubmit);
 
     // Initialize and show the modal
-    // const tradeModalElement = document.getElementById('tradeModal');
-    // const tradeModal = new bootstrap.Modal(tradeModalElement);
-    // tradeModal.show();
+    const tradeModalElement = document.getElementById('tradeModal');
+    const tradeModal = new bootstrap.Modal(tradeModalElement);
+    tradeModal.show();
 
-    // // Clean up modal from the DOM when closed
-    // tradeModalElement.addEventListener('hidden.bs.modal', function () {
-    //     tradeModalElement.remove();
-    // });
+    // Clean up modal from the DOM when closed
+    tradeModalElement.addEventListener('hidden.bs.modal', function () {
+        tradeModalElement.remove();
+    });
 }
 
 async function handleTradeFormSubmit(e) {
     e.preventDefault();
-    // const symbol = document.getElementById('symbol').value;
-    // const amount = document.getElementById('amount').value;
-    // const tradeFraction = document.getElementById('trade-fraction').value;
-    // const duration = document.getElementById('duration').value;
+    const symbol = document.getElementById('symbol').value;
+    const amount = document.getElementById('amount').value;
+    const tradeFraction = document.getElementById('trade-fraction').value;
+    const duration = document.getElementById('duration').value;
 
-    const symbol = 'AAPLYI';
-    const amount = 999;
-    const tradeFraction = 0.5;
-    const duration = 30;
+    // const symbol = 'AAPLYI';
+    // const amount = 999;
+    // const tradeFraction = 0.5;
+    // const duration = 30;
 
     const token = localStorage.getItem('token');
     const response = await fetch('http://localhost:8000/api/start-trading/', {
@@ -365,8 +389,8 @@ async function handleTradeFormSubmit(e) {
 
     if (response.ok) {
         alert('Trade initiated successfully!');
-        // const modal = bootstrap.Modal.getInstance(document.getElementById('tradeModal'));
-        // modal.hide();
+        const modal = bootstrap.Modal.getInstance(document.getElementById('tradeModal'));
+        modal.hide();
     } else {
         alert('Failed to initiate trade.');
     }
@@ -375,7 +399,6 @@ async function handleTradeFormSubmit(e) {
 function loadPortfolio() {
     const mainContent = document.getElementById('main-content');
     mainContent.innerHTML = `
-        <h2>Portfolio</h2>
         <div id="portfolio" class="portfolio-container"></div>`
     ;
     fetchPortfolioData();

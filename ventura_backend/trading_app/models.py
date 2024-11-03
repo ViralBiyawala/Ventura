@@ -43,7 +43,7 @@ class Portfolio(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.user_profile.user.username}'s Portfolio"
+        return f"{self.user_profile.user.username.title()}'s Portfolio"
 
     def update_market_value(self, new_value):
         self.market_value += new_value

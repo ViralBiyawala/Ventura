@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
@@ -13,18 +14,20 @@
 </head>
 <body>
     <header>
-        <img src="{% static 'images/logo.png' %}" alt="Ventura Logo" class="logo">
-        <h1>Ventura Trading App</h1>
+        <div class="header d-flex align-items-center">
+            <img src="{% static 'images/logo.png' %}" alt="Ventura Logo" class="logo me-2">
+            <h1 class="gradient-text mb-0">Ventura</h1>
+        </div>
         <nav>
             <a href="#" id="login-link">Login</a>
             <a href="#" id="register-link">Register</a>
+            <a href="#" id="portfolio-link" style="display: none;">Portfolio</a>
             <a href="#" id="dashboard-link" style="display: none;">Dashboard</a>
             <a href="#" id="profile-link" style="display: none;">Profile</a>
-            <a href="#" id="portfolio-link" style="display: none;">Portfolio</a>
             <a href="#" id="live-trade-link" style="display: none;">Live Trade</a>
         </nav>
     </header>
-    <main id="main-content">
+    <main id="main-content" class="dashboard-container">
         <canvas id="live-trade-chart" width="400" height="200"></canvas>
     </main>
     <footer>
