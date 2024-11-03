@@ -10,39 +10,20 @@ export async function fetchPortfolioData() {
 
         if (response.ok) {
             const portfolioData = await response.json();
-            if (Array.isArray(portfolioData)) {
-                const labels = portfolioData.map(entry => entry.date);
-                const data = portfolioData.map(entry => entry.balance);
-
-                const ctx = document.getElementById('portfolio-chart').getContext('2d');
-                new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: 'Market Value',
-                            data: data,
-                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                            borderColor: 'rgba(75, 192, 192, 1)',
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        scales: {
-                            y: {
-                                beginAtZero: true
-                            }
-                        }
-                    }
-                });
-            } else {
-                alert('Invalid portfolio data.');
-            }
+            const portfolioContainer = document.getElementById('portfolio');
+            portfolioContainer.innerHTML = portfolioData.map(item => `
+                <div class="portfolio-item">
+                    <p>User ID: ${item.user_profile}</p>
+                    <p>Amount: ${item.market_value}</p>
+                    <p>Last Updated: ${item.updated_at}</p>
+                </div>
+            `).join('');
         } else {
-            alert('Failed to fetch portfolio data.');
+            console.error('Error fetching portfolio data:');
         }
     } catch (error) {
         console.error('Error fetching portfolio data:', error);
-        alert('Failed to fetch portfolio data.');
+        // alert('Failed to fetch portfolio data.');
     }
 }
+

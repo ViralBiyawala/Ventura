@@ -1,86 +1,4 @@
-export async function fetchPortfolio() {
-    const token = localStorage.getItem('token');
-    try {
-        const response = await fetch('http://localhost:8000/api/portfolio/', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-
-        if (response.ok) {
-            const portfolioData = await response.json();
-            if (Array.isArray(portfolioData)) {
-                // Update balance dynamically
-                const balance = portfolioData.reduce((acc, item) => acc + item.market_value, 0);
-                const balanceElement = document.getElementById('balance');
-                if (balanceElement) {
-                    balanceElement.innerText = `Balance: $${balance.toFixed(2)}`;
-                }
-
-                // Format and display portfolio data
-                const portfolioElement = document.getElementById('portfolio');
-                if (portfolioElement) {
-                    portfolioElement.innerHTML = portfolioData.map(item => `
-                        <div class="portfolio-item">
-                            <p>ID: ${item.id}</p>
-                            <p>Market Value: $${item.market_value.toFixed(2)}</p>
-                            <p>Updated At: ${new Date(item.updated_at).toLocaleString()}</p>
-                        </div>
-                    `).join('');
-                }
-            } else {
-                alert('Invalid portfolio data.');
-            }
-        } else {
-            alert('Failed to fetch portfolio data.');
-        }
-    } catch (error) {
-        console.error('Error fetching portfolio:', error);
-        alert('Failed to fetch portfolio data.');
-    }
-}
-
-export function startPortfolioUpdateInterval() {
-    setInterval(() => {
-        const balanceElement = document.getElementById('balance');
-        if (balanceElement) {
-            fetchPortfolio();
-        }
-    }, 5000); // Update every 5 seconds
-}
-
-// export async function fetchTrades() {
-//     const token = localStorage.getItem('token');
-//     try {
-//         const response = await fetch('http://localhost:8000/api/trades/', {
-//             method: 'GET',
-//             headers: {
-//                 'Authorization': `Bearer ${token}`
-//             }
-//         });
-
-//         if (response.ok) {
-//             const tradesData = await response.json();
-//             const tradesTable = document.getElementById('trades-table');
-//             tradesTable.innerHTML = tradesData.map(trade => `
-//                 <tr>
-//                     <td>${trade.symbol}</td>
-//                     <td>${trade.trade_type}</td>
-//                     <td>${trade.current_price}</td>
-//                     <td>${trade.quantity}</td>
-//                     <td>${trade.timestamp}</td>
-//                 </tr>
-//             `).join('');
-//         } else {
-//             alert('Failed to fetch trades data.');
-//         }
-//     } catch (error) {
-//         console.error('Error fetching trades:', error);
-//         alert('Failed to fetch trades data.');
-//     }
-// }
-
+// ...existing code...
 export async function fetchInvestmentSettings() {
     const token = localStorage.getItem('token');
     try {
@@ -112,34 +30,10 @@ export async function fetchInvestmentSettings() {
         }
     } catch (error) {
         console.error('Error fetching investment settings:', error);
-        alert('Failed to fetch investment settings.');
+        alert('Failed to fetch investment settings.', error);
     }
 }
-
-export async function fetchLiveTrades() {
-    const token = localStorage.getItem('token');
-    try {
-        const response = await fetch('http://localhost:8000/api/live-trades/', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-
-        if (response.ok) {
-            const liveTradesData = await response.json();
-            const liveTradesSelect = document.getElementById('live-trades-select');
-            liveTradesSelect.innerHTML = liveTradesData.map(trade => `
-                <option value="${trade.id}">${trade.symbol} - ${trade.trade_type}</option>
-            `).join('');
-        } else {
-            alert('Failed to fetch live trades data.');
-        }
-    } catch (error) {
-        console.error('Error fetching live trades:', error);
-        alert('Failed to fetch live trades data.');
-    }
-}
+// ...existing code...
 
 export async function initiateTrade(tradeData) {
     const token = localStorage.getItem('token');

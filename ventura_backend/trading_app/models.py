@@ -39,12 +39,12 @@ class Trade(models.Model):
 # Portfolio will store the user's portfolio information and its market value.
 class Portfolio(models.Model):
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
-    market_value = models.FloatField()
+    market_value = models.FloatField(default=0.0)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.user_profile.user.username}'s Portfolio"
 
     def update_market_value(self, new_value):
-        self.market_value = new_value
+        self.market_value += new_value
         self.save()

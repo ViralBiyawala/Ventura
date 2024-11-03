@@ -1,7 +1,32 @@
 import { register, login } from './api.js';
-import { fetchPortfolio, fetchInvestmentSettings, startPortfolioUpdateInterval } from './dashboard.js';
+import { fetchInvestmentSettings } from './dashboard.js';
 import { fetchPortfolioData } from './portfolio.js';
-import { fetchLiveTrades, visualizeLiveTrade } from './liveTrade.js';
+// import { fetchLiveTrades, visualizeLiveTrade } from './liveTrade.js';
+
+// Helper functions to save and load the last API call details
+function saveLastApiCall(callName, params = []) {
+    localStorage.setItem('lastGetApiCall', callName);
+    localStorage.setItem('lastGetApiParams', JSON.stringify(params));
+}
+
+function getLastApiCall() {
+    return localStorage.getItem('lastGetApiCall');
+}
+
+function getLastApiParams() {
+    const params = localStorage.getItem('lastGetApiParams');
+    return params ? JSON.parse(params) : [];
+}
+
+// Mapping of function names to their corresponding functions
+const functionMapping = {
+    loadLogin,
+    loadDashboard,
+    loadRegister,
+    loadProfile,
+    loadPortfolio,
+    loadLiveTrade
+};
 
 document.addEventListener('DOMContentLoaded', function () {
     const mainContent = document.getElementById('main-content');
@@ -13,36 +38,61 @@ document.addEventListener('DOMContentLoaded', function () {
     const liveTradeLink = document.getElementById('live-trade-link');
 
     loginLink.addEventListener('click', function () {
+        saveLastApiCall('');
         loadLogin();
     });
 
     dashboardLink.addEventListener('click', function () {
+        saveLastApiCall('loadDashboard');
         loadDashboard();
     });
 
     registerLink.addEventListener('click', function () {
+        saveLastApiCall('');
         loadRegister();
     });
 
     profileLink.addEventListener('click', function () {
+        saveLastApiCall('loadProfile');
         loadProfile();
     });
 
     portfolioLink.addEventListener('click', function () {
+        saveLastApiCall('loadPortfolio');
         loadPortfolio();
     });
 
     liveTradeLink.addEventListener('click', function () {
+        saveLastApiCall('loadLiveTrade');
         loadLiveTrade();
     });
 
     const token = localStorage.getItem('token');
+    
     if (token) {
         showAuthenticatedLinks();
-        loadDashboard();
+        // Load the last page accessed or default to Dashboard
+        const lastCall = getLastApiCall();
+        const lastParams = getLastApiParams();
+        
+        if (lastCall && functionMapping[lastCall]) {
+            functionMapping[lastCall](...lastParams);
+        } else {
+            loadDashboard();
+        }
     } else {
         loadLogin();
     }
+
+    // Re-hit the last "GET" API every 60 seconds if it exists
+    setInterval(function () {
+        const lastCall = getLastApiCall();
+        const lastParams = getLastApiParams();
+
+        if (lastCall && functionMapping[lastCall] && (lastCall.startsWith('loadPortfolio') || lastCall.startsWith('loadLiveTrade'))) {
+            functionMapping[lastCall](...lastParams);
+        }
+    }, 1000);
 });
 
 function showAuthenticatedLinks() {
@@ -141,7 +191,7 @@ async function handleLogin() {
     }
 }
 
-async function loadDashboard() {
+function loadDashboard() {
     const mainContent = document.getElementById('main-content');
     mainContent.innerHTML = `
         <h2>Dashboard</h2>
@@ -161,7 +211,8 @@ async function loadDashboard() {
         </table>
     `;
     document.getElementById('initiate-trade-button').addEventListener('click', initiateTrade);
-    await fetchInvestmentSettings();
+
+    fetchInvestmentSettings();
 }
 
 function loadProfile() {
@@ -230,13 +281,11 @@ function handleDeleteProfile() {
 }
 
 function initiateTrade() {
-    // Remove existing modal if it's in the DOM
     const existingModal = document.getElementById('tradeModal');
     if (existingModal) {
         existingModal.remove();
     }
 
-    // Inject new modal HTML into the DOM
     const mainContent = document.getElementById('main-content');
     const modalHTML = `
         <div class="modal fade" id="tradeModal" tabindex="-1" aria-labelledby="tradeModalLabel" aria-hidden="true">
@@ -323,23 +372,16 @@ function loadPortfolio() {
     const mainContent = document.getElementById('main-content');
     mainContent.innerHTML = `
         <h2>Portfolio</h2>
-        <div id="balance">Balance: $0.00</div>
-        <div id="portfolio" class="portfolio-container"></div>
-    `;
-    fetchPortfolio();
-    startPortfolioUpdateInterval();
+        <div id="portfolio" class="portfolio-container"></div>`
+    ;
+    fetchPortfolioData();
 }
 
 function loadLiveTrade() {
     const mainContent = document.getElementById('main-content');
     mainContent.innerHTML = `
         <h2>Live Trade</h2>
-        <select id="live-trades-select"></select>
-        <div id="live-trade-visualization"></div>
+        <p>Visualize live trading data here.</p>
+        <canvas id="live-trade-chart" width="400" height="200"></canvas>
     `;
-    fetchLiveTrades();
-    document.getElementById('live-trades-select').addEventListener('change', function () {
-        const tradeId = this.value;
-        visualizeLiveTrade(tradeId);
-    });
 }
