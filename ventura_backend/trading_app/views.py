@@ -131,9 +131,10 @@ class LiveTradeView(APIView):
 
     def get(self, request):
         user_profile = request.user.userprofile
-        trades = Trade.objects.filter(user_profile=user_profile).order_by('-timestamp')
+        symbol = request.query_params.get('symbol')
+        trades = Trade.objects.filter(user_profile=user_profile, symbol=symbol).order_by('-timestamp')
         data = [{"id": trade.id, "symbol": trade.symbol, "trade_type": trade.trade_type, "price": trade.current_price, "quantity": trade.quantity, "timestamp": trade.timestamp} for trade in trades]
-        return Response(data)
+        return Response(data[:390])
 
 class TradeListView(APIView):
     permission_classes = [IsAuthenticated]

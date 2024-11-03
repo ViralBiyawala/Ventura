@@ -1,7 +1,7 @@
 import { register, login } from './api.js';
 import { fetchInvestmentSettings } from './dashboard.js';
 import { fetchPortfolioData } from './portfolio.js';
-import { fetchInvestmentSettings } from './liveTrade.js';
+import { fetchInvestmentOptions, visualizeLiveTrade } from './liveTrade.js';
 
 // Helper functions to save and load the last API call details
 function saveLastApiCall(callName, params = []) {
@@ -392,7 +392,7 @@ function loadLiveTrade() {
         <canvas id="live-trade-chart" width="400" height="200"></canvas>
     `;
 
-    fetchLiveTradeSettings();
+    fetchInvestmentOptions();
 
     const liveTradesSelect = document.getElementById('live-trades-select');
     liveTradesSelect.addEventListener('change', function () {

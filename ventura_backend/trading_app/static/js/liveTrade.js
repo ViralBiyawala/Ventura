@@ -1,4 +1,4 @@
-export async function fetchInvestmentSettings() {
+export async function fetchInvestmentOptions() {
     const token = localStorage.getItem('token');
     try {
         const response = await fetch('http://localhost:8000/api/investment-settings/', {
@@ -39,20 +39,30 @@ export async function visualizeLiveTrade(symbol) {
 
         if (response.ok) {
             const tradeData = await response.json();
-            const labels = tradeData.map(trade => new Date(trade.timestamp).toLocaleTimeString());
-            const prices = tradeData.map(trade => trade.price);
+            console.log(tradeData);
+            const candlestickData = tradeData.map(trade => ({
+                x: new Date(trade.timestamp).valueOf(),
+                o: trade.price - 10,
+                h: trade.price  + 30,
+                l: trade.price - 15,
+                c: trade.price
+            }));
 
             const ctx = document.getElementById('live-trade-chart').getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
+            ctx.canvas.width = 1000;
+            ctx.canvas.height = 250;
+
+            const chart = new Chart(ctx, {
+                type: 'candlestick',
                 data: {
-                    labels: labels,
                     datasets: [{
                         label: `Live Trade Data for ${symbol}`,
-                        data: prices,
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        borderWidth: 1,
-                        fill: false
+                        data: candlestickData,
+                    }, {
+                        label: 'Close price',
+                        type: 'line',
+                        data: candlestickData.map(d => ({ x: d.x, y: d.c })),
+                        hidden: true,
                     }]
                 },
                 options: {
@@ -60,15 +70,26 @@ export async function visualizeLiveTrade(symbol) {
                         x: {
                             type: 'time',
                             time: {
-                                unit: 'minute'
+                                unit: 'day',
+                                tooltipFormat: 'MMM dd'
                             }
                         },
                         y: {
                             beginAtZero: false
                         }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                title: function(tooltipItems) {
+                                    return tooltipItems[0].label.split(',')[0];
+                                }
+                            }
+                        }
                     }
                 }
             });
+
         } else {
             alert('Failed to fetch trade data.');
         }

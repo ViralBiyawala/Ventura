@@ -29,6 +29,7 @@ nav a {
 
 main {
     padding: 1rem;
+    padding-bottom: 5rem; /* Add padding to the bottom */
 }
 
 /* Footer styling */
@@ -37,12 +38,9 @@ footer {
     padding: 1rem;
     background-color: #007bff;
     color: white;
-    position: fixed;
-    width: 100%;
-    bottom: 0;
+    /* Remove fixed position */
 }
 
-/* Button styling */
 button {
     background-color: #007bff;
     color: white;
