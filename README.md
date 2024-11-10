@@ -76,7 +76,6 @@ Ventura is a Django-based full stack web application for a trading. It provides 
     ```
 
 ## Running the Application
-## Running the Application
 
 1. Start the Redis server in a new terminal:
     ```bash
