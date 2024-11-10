@@ -1,4 +1,5 @@
-import { hideAuthenticatedLinks, loadLogin } from './app.js';
+import { hideAuthenticatedLinks } from './app.js';
+import { loadLogin } from './login.js'; 
 import { fetchUserData, deleteUserData } from './api.js';
 
 async function fetchProfile(token) {

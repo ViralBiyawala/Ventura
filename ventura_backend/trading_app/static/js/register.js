@@ -1,33 +1,6 @@
 import { register } from './api.js';
 
-export function loadRegister() {
-    const mainContent = document.getElementById('main-content');
-    mainContent.innerHTML = `
-        <div class="card" style="max-width: 400px; margin: 2rem auto;">
-            <h2 class="text-center mb-4">Register</h2>
-            <form id="register-form">
-                <div class="form-group">
-                    <input type="text" id="username" placeholder="Username" required>
-                </div>
-                <div class="form-group">
-                    <input type="password" id="password" placeholder="Password" required>
-                </div>
-                <div class="form-group">
-                    <input type="password" id="confirm-password" placeholder="Confirm Password" required>
-                </div>
-                <button type="submit" class="w-100">Register</button>
-            </form>
-        </div>
-    `;
-
-    const registerForm = document.getElementById('register-form');
-    registerForm.addEventListener('submit', function (e) {
-        e.preventDefault();
-        handleRegister();
-    });
-}
-
-async function handleRegister() {
+export async function handleRegister() {
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
     const confirmPassword = document.getElementById('confirm-password').value;
@@ -49,3 +22,31 @@ async function handleRegister() {
         alert('An error occurred: ' + error.message);
     }
 }
+
+export async function loadRegister() {
+    const mainContent = document.getElementById('main-content');
+    mainContent.innerHTML = `
+        <div class="card" style="max-width: 400px; margin: 2rem auto;">
+            <h2 class="text-center mb-4">Register</h2>
+            <form id="register-form">
+                <div class="form-group">
+                    <input type="text" id="username" placeholder="Username" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="password" placeholder="Password" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="confirm-password" placeholder="Confirm Password" required>
+                </div>
+                <button type="submit" class="w-100 icon-button">Register</button>
+            </form>
+        </div>
+    `;
+
+    const registerForm = document.getElementById('register-form');
+    registerForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        handleRegister();
+    });
+}
+

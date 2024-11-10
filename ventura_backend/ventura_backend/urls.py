@@ -16,8 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from trading_app.views import IndexView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    # on the root path, show the index page via the trading_app app
+    path('', IndexView.as_view(), name='index'),
     path('api/', include('trading_app.urls')),
 ]

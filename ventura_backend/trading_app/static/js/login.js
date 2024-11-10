@@ -1,10 +1,12 @@
 import { login } from './api.js';
+import { showAuthenticatedLinks } from './app.js';
+import { loadDashboard } from './dashboard.js';
 
-export function loadLogin() {
+export async function loadLogin() {
     const mainContent = document.getElementById('main-content');
     mainContent.innerHTML = `
         <div class="card" style="max-width: 400px; margin: 2rem auto;">
-            <h2 class="text-center mb-4">Login</h2>
+            <h2 class="text-center mb-4">Login </h2>
             <form id="login-form">
                 <div class="form-group">
                     <input type="text" id="username" placeholder="Username" required>
@@ -12,7 +14,7 @@ export function loadLogin() {
                 <div class="form-group">
                     <input type="password" id="password" placeholder="Password" required>
                 </div>
-                <button type="submit" class="w-100">Login</button>
+                <button type="submit" class="w-100 icon-button">Login</button>
             </form>
         </div>
     `;
@@ -24,7 +26,7 @@ export function loadLogin() {
     });
 }
 
-async function handleLogin() {
+export async function handleLogin() {
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
 
