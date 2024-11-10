@@ -2,6 +2,7 @@
 from rest_framework import serializers
 from .models import UserProfile, InvestmentSettings, Trade, Portfolio
 from django.contrib.auth.models import User
+from .data.data_fetcher import fetch_real_time_data
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -22,6 +23,16 @@ class InvestmentSettingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = InvestmentSettings
         fields = '__all__'
+
+    def create(self, validated_data):
+        symbol = validated_data.get('symbol')
+        real_time_data = fetch_real_time_data(symbol)
+        if (real_time_data):
+            validated_data['initial_price'] = real_time_data['price']
+        else:
+            validated_data['initial_price'] = 0.00
+            # raise serializers.ValidationError(f"Symbol {symbol} does not exist or failed to fetch data.")
+        return super().create(validated_data)
 
 class TradeSerializer(serializers.ModelSerializer):
     class Meta:

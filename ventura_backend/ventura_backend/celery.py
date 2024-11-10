@@ -9,5 +9,4 @@ app.config_from_object("django.conf:settings", namespace="CELERY")
 app.autodiscover_tasks()
 app.conf.update(
     broker_connection_retry_on_startup=True,
-    worker_concurrency=2,  # Adjust the number of worker processes as needed
 )

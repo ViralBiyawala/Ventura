@@ -138,6 +138,8 @@ def execute_trades(env, model, initial_balance, trade_fraction, symbol, stop_los
         if terminated or truncated:
             break
 
+        # time.sleep(30) # Sleep for 30 seconds before fetching the next price
+
     if shares_held > 0:
         balance += (shares_held * current_price)
         logger.info(f"Final SELL {shares_held:.2f} shares at ${current_price:.2f} | Balance: ${balance:.2f}")

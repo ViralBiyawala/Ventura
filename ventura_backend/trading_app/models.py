@@ -20,6 +20,10 @@ class InvestmentSettings(models.Model):
     long_term_percentage = models.DecimalField(max_digits=5, decimal_places=2)
     duration_days = models.IntegerField()
     start_date = models.DateTimeField(auto_now_add=True)
+    initial_price = models.FloatField(default=0.0)  # Store the price at the time of investment
+
+    class Meta:
+        unique_together = ('user_profile', 'symbol')  # Add unique constraint
 
     def __str__(self):
         return f"{self.user_profile.user.username}'s Investment Settings"

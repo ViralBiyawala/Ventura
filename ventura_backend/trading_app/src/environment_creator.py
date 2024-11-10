@@ -2,10 +2,12 @@
 from ..logs.logging_config import logger
 import gymnasium as gym
 import pandas as pd
-
+import pickle
+import os
 
 # environment_creator.py
 def create_environment(env_data, window_size):
+
     start_index = window_size
     end_index = len(env_data)
     try:
@@ -18,7 +20,6 @@ def create_environment(env_data, window_size):
         logger.error(f"Failed to create environment: {e}")
         return None
 
-    
 def update_environment_with_new_data(env, new_data_point):
     env.unwrapped.prices = list(env.unwrapped.prices) + [new_data_point['Close']]
     env.unwrapped._current_tick += 1

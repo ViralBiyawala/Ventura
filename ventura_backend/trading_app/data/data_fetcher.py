@@ -7,29 +7,30 @@ def fetch_real_time_data(symbol):
     return None
     load_dotenv()
 
-    API_KEY = os.getenv('ALPHA_VANTAGE_API_KEY')
-    # url = f'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={symbol}&outputsize=full&apikey={API_KEY}'
-    url = f'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol={symbol}&interval=1min&apikey={API_KEY}'
+    API_KEY_ID = os.getenv('ALPACA_API_KEY')
+    API_SECRET_KEY = os.getenv('ALPACA_API_SECRET')
+    url = f'https://data.alpaca.markets/v2/stocks/{symbol}/trades/latest?feed=iex'
+
+    headers = {
+        "accept": "application/json",
+        "APCA-API-KEY-ID": API_KEY_ID,
+        "APCA-API-SECRET-KEY": API_SECRET_KEY
+    }
 
     try:
-        r = requests.get(url)
+        r = requests.get(url, headers=headers)
         data = r.json()
 
-        if 'Time Series (Daily)' in data:
-            # Get the latest bar
-            latest_timestamp = max(data['Time Series (Daily)'])
-            latest_bar = data['Time Series (Daily)'][latest_timestamp]
-            bar_dict = {
-                'open': latest_bar['1. open'],
-                'high': latest_bar['2. high'],
-                'low': latest_bar['3. low'],
-                'close': latest_bar['4. close'],
-                'volume': latest_bar['5. volume'],
-                'timestamp': latest_timestamp
+        if 'trade' in data:
+            trade = data['trade']
+            trade_dict = {
+                'price': trade['p'],
+                'size': trade['s'],
+                'timestamp': trade['t'],
+                'exchange': trade['x']
             }
-            logger.info(f"Data fetched for {symbol}: {bar_dict}")
-            # logger.info(f"Successfully fetched data for {symbol}")
-            return bar_dict
+            logger.info(f"Data fetched for {symbol}: {trade_dict}")
+            return trade_dict
         else:
             logger.error(f"No data found for symbol: {symbol}")
             return None
